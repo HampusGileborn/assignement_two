@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import prompt from "prompt-sync";
 import { newCategory } from './functions/newCategory.js';
+import { newProduct } from "./functions/newProduct.js";
 
 
 mongoose.connect("mongodb://localhost:27017/johan-hampus");
@@ -83,7 +84,8 @@ async function runQuerys() {
 
           break;
         case "2":
-          await console.log("");
+          await newProduct(Product);
+          
           break;
         case "3":
           await console.log("");
