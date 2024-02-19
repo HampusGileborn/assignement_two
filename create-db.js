@@ -35,12 +35,18 @@ const salesOrderSchema = new Schema({
     quantity: { type: Number, required: true },
     status: { type: String, enum: ['pending', 'completed'], default: 'pending' }
 });
+// Define Schema for categories
+const categorySchema = new Schema({
+    name: { type: String, requried: true },
+    description: { type: String }
+});
 
 // Define models
 const Product = mongoose.model('Product', productSchema);
 const Offer = mongoose.model('Offer', offerSchema);
 const Supplier = mongoose.model('Supplier', supplierSchema);
 const SalesOrder = mongoose.model('SalesOrder', salesOrderSchema);
+const Category = mongoose.model('Category', categorySchema);
 
 // Define data
 const productsData = [
@@ -67,7 +73,13 @@ const salesOrdersData = [
     { offer: "Offer 1", quantity: 2, status: "pending" },
     { offer: "Offer 3", quantity: 1, status: "pending" }
 ];
-
+const categoriesData = [
+    { name: "Electronics", description: "" },
+    { name: "Clothing", description: "" },
+    { name: "Home Appliances", description: "" },
+    { name: "Beauty & Personal Care", description: "" },
+    { name: "Sports & Outdoors", description: "" }
+]
 // Function to insert data into MongoDB
 async function insertData() {
     try {
@@ -82,6 +94,9 @@ async function insertData() {
 
         // Insert sales orders
         await SalesOrder.insertMany(salesOrdersData);
+
+        // Insert categories
+        await Category.insertMany(categoriesData);
 
         console.log("Data inserted successfully.");
     } catch (error) {
