@@ -1,8 +1,7 @@
-import mongoose, { connect } from "mongoose";
+import mongoose from "mongoose";
 
-connect("mongodb://localhost:27017/johan-hampus");
+mongoose.connect("mongodb://localhost:27017/johan-hampus");
 
-const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 // Define schema for products
@@ -40,4 +39,4 @@ const Offer = mongoose.model('Offer', offerSchema);
 const Supplier = mongoose.model('Supplier', supplierSchema);
 const SalesOrder = mongoose.model('SalesOrder', salesOrderSchema);
 
-module.exports = { Product, Offer, Supplier, SalesOrder };
+export { Product, Offer, Supplier, SalesOrder };
