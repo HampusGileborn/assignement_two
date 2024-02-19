@@ -1,55 +1,5 @@
-import mongoose from "mongoose";
 import prompt from "prompt-sync";
-import { newCategory } from './functions/newCategory.js';
-import { newProduct } from "./functions/newProduct.js";
-
-
-mongoose.connect("mongodb://localhost:27017/johan-hampus");
-
-const Schema = mongoose.Schema;
-
-// Define schema for products
-const productSchema = new Schema({
-  name: { type: String, required: true },
-  category: { type: String, required: true },
-  price: { type: Number, required: true },
-  cost: { type: Number, required: true },
-  stock: { type: Number, required: true },
-});
-
-// Define schema for offers
-const offerSchema = new Schema({
-  products: [{ type: String, required: true }],
-  price: { type: Number, required: true },
-  active: { type: Boolean, default: true },
-});
-
-// Define schema for suppliers
-const supplierSchema = new Schema({
-  name: { type: String, required: true },
-  contact: { type: String, required: true },
-});
-
-// Define schema for sales orders
-const salesOrderSchema = new Schema({
-  offer: { type: String, required: true },
-  quantity: { type: Number, required: true },
-  status: { type: String, enum: ["pending", "completed"], default: "pending" },
-});
-
-// Define Schema for categories
-const categorySchema = new Schema({
-    name: { type: String, requried: true },
-    description: { type: String }
-});
-
-// Define models
-const Product = mongoose.model("Product", productSchema);
-const Offer = mongoose.model("Offer", offerSchema);
-const Supplier = mongoose.model("Supplier", supplierSchema);
-const SalesOrder = mongoose.model("SalesOrder", salesOrderSchema);
-const Category = mongoose.model('Category', categorySchema);
-
+import { newCategory, newProduct, viewProductsByCategory } from './market.js';
 
 async function runQuerys() {
   try {
@@ -76,19 +26,19 @@ async function runQuerys() {
                             //  14. View sum of all profits
                             //  15. Exit
 
-      console.log("----------------------------------------------");
+      console.log("-".repeat(100));
       let input = p("Make choice by entering a number: ");
       switch (input) {
         case "1":
-          await newCategory(Category);
+          await newCategory();
 
           break;
         case "2":
-          await newProduct(Product);
-          
+          await newProduct();
+
           break;
         case "3":
-          await console.log("");
+          await viewProductsByCategory();
           break;
         case "4":
           await console.log("");
