@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import prompt from "prompt-sync";
+import { newCategory } from './functions/newCategory.js';
+
 
 mongoose.connect("mongodb://localhost:27017/johan-hampus");
 
@@ -34,11 +36,19 @@ const salesOrderSchema = new Schema({
   status: { type: String, enum: ["pending", "completed"], default: "pending" },
 });
 
+// Define Schema for categories
+const categorySchema = new Schema({
+    name: { type: String, requried: true },
+    description: { type: String }
+});
+
 // Define models
 const Product = mongoose.model("Product", productSchema);
 const Offer = mongoose.model("Offer", offerSchema);
 const Supplier = mongoose.model("Supplier", supplierSchema);
 const SalesOrder = mongoose.model("SalesOrder", salesOrderSchema);
+const Category = mongoose.model('Category', categorySchema);
+
 
 async function runQuerys() {
   try {
@@ -69,8 +79,8 @@ async function runQuerys() {
       let input = p("Make choice by entering a number: ");
       switch (input) {
         case "1":
-          await console.log("du valde 1");
-          
+          await newCategory(Category);
+
           break;
         case "2":
           await console.log("");
