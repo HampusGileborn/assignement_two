@@ -6,36 +6,49 @@ const Schema = mongoose.Schema;
 
 // Define schema for products
 const productSchema = new Schema({
-  name: { type: String, required: true },
-  category: { type: String, required: true },
-  price: { type: Number, required: true },
-  cost: { type: Number, required: true },
-  stock: { type: Number, required: true },
+    name: { type: String, required: true },
+    category: { type: String, required: true },
+    price: { type: Number, required: true },
+    cost: { type: Number, required: true },
+    stock: { type: Number, required: true },
 });
 
 // Define schema for offers
 const offerSchema = new Schema({
-  products: [{ type: String, required: true }],
-  price: { type: Number, required: true },
-  active: { type: Boolean, default: true },
+    offerId: { type: String, required: true },
+    products: [{ type: Schema.Types.ObjectId, ref: 'Product', required: true }],
+    price: { type: Number, required: true },
+    active: { type: Boolean, default: true },
 });
+
 
 // Define schema for suppliers
 const supplierSchema = new Schema({
-  name: { type: String, required: true },
-  contact: { type: String, required: true },
+    name: { type: String, required: true },
+    contact: { type: String, required: true },
 });
 
 // Define schema for sales orders
-const salesOrderSchema = new Schema({
-  offer: { type: String, required: true },
-  quantity: { type: Number, required: true },
-  status: { type: String, enum: ["pending", "completed"], default: "pending" },
+const salesOrderSchema = new mongoose.Schema({
+    offer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Offer',
+        required: true
+    },
+    quantity: {
+        type: Number,
+        required: true
+    },
+    status: {
+        type: String,
+        enum: ['pending', 'shipped'],
+        default: 'pending'
+    }
 });
 
 // Define Schema for categories
 const categorySchema = new Schema({
-    name: { type: String, requried: true },
+    name: { type: String, required: true },
     description: { type: String }
 });
 
@@ -43,5 +56,5 @@ const categorySchema = new Schema({
 export const Product = mongoose.model("Product", productSchema);
 export const Offer = mongoose.model("Offer", offerSchema);
 export const Supplier = mongoose.model("Supplier", supplierSchema);
-export const SalesOrder = mongoose.model("SalesOrder", salesOrderSchema);
+export const SalesOrder = mongoose.model('SalesOrder', salesOrderSchema);
 export const Category = mongoose.model('Category', categorySchema);

@@ -1,5 +1,5 @@
 import prompt from "prompt-sync";
-import { newCategory, newProduct, viewProductsByCategory } from './market.js';
+import { shipOrders, createOrderForOffers, createOrderForProducts, newCategory, newProduct, viewProductsByCategory, viewProductsBySupplier, viewOffersInPriceRange, viewOffersByCategory, viewOffersByStock } from './market.js';
 
 async function runQuerys() {
   try {
@@ -41,25 +41,25 @@ async function runQuerys() {
           await viewProductsByCategory();
           break;
         case "4":
-          await console.log("");
+          await viewProductsBySupplier();
           break;
         case "5":
-          await console.log("");
+          await viewOffersInPriceRange();
           break;
         case "6":
-          await console.log("");
+          await viewOffersByCategory();
           break;
         case "7":
-          await console.log("");
+          await viewOffersByStock();
           break;
         case "8":
-          await console.log("");
+          await createOrderForProducts();
           break;
         case "9":
-          await console.log("");
+          await createOrderForOffers();
           break;
         case "10":
-          await console.log("");
+          await shipOrders();
           break;
         case "11":
           await console.log("");
