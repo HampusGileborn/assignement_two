@@ -8,7 +8,7 @@ const db = mongoose.connection;
 const Schema = mongoose.Schema;
 
 // Define schema for products
-const productSchema = new mongoose.Schema({
+const productSchema = new Schema({
     name: { type: String, required: true },
     category: { type: String, required: true },
     supplier: { type: String, required: true },
@@ -67,8 +67,8 @@ const offersData = [
 ];
 
 const suppliersData = [
-    { name: "Electronics Supplier Inc.", contact: "John Doe (john@electronicsupplier.com)" },
-    { name: "Fashion Supplier Co.", contact: "Jane Smith (jane@fashionsupplier.com)" }
+    { name: "Electronics Supplier Inc.", contact: "john@electronicsupplier.com" },
+    { name: "Fashion Supplier Co.", contact: "jane@fashionsupplier.com" }
 ];
 
 const salesOrdersData = [

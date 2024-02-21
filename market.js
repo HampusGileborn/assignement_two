@@ -37,21 +37,10 @@ export async function newProduct() {
         categories.forEach((category, index) => {
             console.log(`${index + 1}. ${category.name}`);
         });
-
-        // Display existing suppliers for the user to choose from
-        const suppliers = await Supplier.find();
-        console.log("Existing Suppliers:");
-        suppliers.forEach((supplier, index) => {
-            console.log(`${index + 1}. ${supplier.name}`);
-        });
-
-        // Display the option for adding a new category
-        console.log(`${categories.length + 1}. Add a new category`);
-        // Display the option for adding a new supplier
-        console.log(`${suppliers.length + 1}. Add a new supplier`);
+        console.log(`${categories.length + 1}. Add a new category`); // Option to add a new category
 
         // Prompt the user to choose a category or add a new one
-        const categoryChoice = parseInt(p("Choose existing category or add a new one (Enter number): "));
+        let categoryChoice = parseInt(p("Choose existing category or add a new one (Enter number): "));
         let category;
         // If the user chooses an existing category
         if (categoryChoice >= 1 && categoryChoice <= categories.length) {
@@ -71,8 +60,16 @@ export async function newProduct() {
             return;
         }
 
+        // Display existing suppliers for the user to choose from
+        const suppliers = await Supplier.find();
+        console.log("Existing Suppliers:");
+        suppliers.forEach((supplier, index) => {
+            console.log(`${index + 1}. ${supplier.name}`);
+        });
+        console.log(`${suppliers.length + 1}. Add a new supplier`); // Option to add a new supplier
+
         // Prompt the user to choose a supplier or add a new one
-        const supplierChoice = parseInt(p("Choose existing supplier or add a new one (Enter number): "));
+        let supplierChoice = parseInt(p("Choose existing supplier or add a new one (Enter number): "));
         let supplier;
         // If the user chooses an existing supplier
         if (supplierChoice >= 1 && supplierChoice <= suppliers.length) {
@@ -98,8 +95,8 @@ export async function newProduct() {
 
         const addedProduct = new Product({
             name,
-            category: category.name, // Assign category ID instead of name
-            supplier: supplierName, // Assign supplier ID instead of name
+            category: category.name,
+            supplier: supplier.name,
             price,
             cost,
             stock,
@@ -111,7 +108,6 @@ export async function newProduct() {
         console.error("Error adding new product:", error);
     }
 }
-
 // Case 3: View products by category
 export async function viewProductsByCategory() {
     try {
