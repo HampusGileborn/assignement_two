@@ -8,9 +8,10 @@ const db = mongoose.connection;
 const Schema = mongoose.Schema;
 
 // Define schema for products
-const productSchema = new Schema({
+const productSchema = new mongoose.Schema({
     name: { type: String, required: true },
     category: { type: String, required: true },
+    supplier: { type: String, required: true },
     price: { type: Number, required: true },
     cost: { type: Number, required: true },
     stock: { type: Number, required: true }
@@ -35,27 +36,28 @@ const salesOrderSchema = new Schema({
     quantity: { type: Number, required: true },
     status: { type: String, enum: ['pending', 'completed'], default: 'pending' }
 });
+
 // Define Schema for categories
 const categorySchema = new Schema({
-    name: { type: String, requried: true },
+    name: { type: String, required: true },
     description: { type: String }
 });
 
 // Define models
 const Product = mongoose.model('Product', productSchema);
 const Offer = mongoose.model('Offer', offerSchema);
-const Supplier = mongoose.model('Supplier', supplierSchema);
+const Supplier = mongoose.model('Supplier', supplierSchema); // Define Supplier model
 const SalesOrder = mongoose.model('SalesOrder', salesOrderSchema);
 const Category = mongoose.model('Category', categorySchema);
 
 // Define data
 const productsData = [
-    { name: "Laptop", category: "Electronics", price: 1000, cost: 800, stock: 50 },
-    { name: "Smartphone", category: "Electronics", price: 800, cost: 600, stock: 40 },
-    { name: "T-shirt", category: "Clothing", price: 20, cost: 10, stock: 100 },
-    { name: "Refrigerator", category: "Home Appliances", price: 1200, cost: 1000, stock: 30 },
-    { name: "Shampoo", category: "Beauty & Personal Care", price: 10, cost: 5, stock: 80 },
-    { name: "Soccer Ball", category: "Sports & Outdoors", price: 30, cost: 20, stock: 60 }
+    { name: "Laptop", category: "Electronics", supplier: "Test", price: 1000, cost: 800, stock: 50 },
+    { name: "Smartphone", category: "Electronics", supplier: "Test", price: 800, cost: 600, stock: 40 },
+    { name: "T-shirt", category: "Clothing", supplier: "Test", price: 20, cost: 10, stock: 100 },
+    { name: "Refrigerator", category: "Home Appliances", supplier: "Test" , price: 1200, cost: 1000, stock: 30 },
+    { name: "Shampoo", category: "Beauty & Personal Care", supplier: "Test", price: 10, cost: 5, stock: 80 },
+    { name: "Soccer Ball", category: "Sports & Outdoors", supplier: "Test", price: 30, cost: 20, stock: 60 }
 ];
 
 const offersData = [
@@ -80,6 +82,7 @@ const categoriesData = [
     { name: "Beauty & Personal Care", description: "" },
     { name: "Sports & Outdoors", description: "" }
 ]
+
 // Function to insert data into MongoDB
 async function insertData() {
     try {

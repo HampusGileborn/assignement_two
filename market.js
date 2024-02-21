@@ -30,21 +30,83 @@ export async function newProduct() {
     try {
         console.log("Add data for a new product: ");
         const name = p("Enter name of product: ");
-        const category = p("Enter category: ");
+        
+        // Display existing categories for the user to choose from
+        const categories = await Category.find();
+        console.log("Existing Categories:");
+        categories.forEach((category, index) => {
+            console.log(`${index + 1}. ${category.name}`);
+        });
+
+        // Display existing suppliers for the user to choose from
+        const suppliers = await Supplier.find();
+        console.log("Existing Suppliers:");
+        suppliers.forEach((supplier, index) => {
+            console.log(`${index + 1}. ${supplier.name}`);
+        });
+
+        // Display the option for adding a new category
+        console.log(`${categories.length + 1}. Add a new category`);
+        // Display the option for adding a new supplier
+        console.log(`${suppliers.length + 1}. Add a new supplier`);
+
+        // Prompt the user to choose a category or add a new one
+        const categoryChoice = parseInt(p("Choose existing category or add a new one (Enter number): "));
+        let category;
+        // If the user chooses an existing category
+        if (categoryChoice >= 1 && categoryChoice <= categories.length) {
+            category = categories[categoryChoice - 1];
+        } else if (categoryChoice === categories.length + 1) {
+            // If the user chooses to add a new category
+            const categoryName = p("Enter name for the new category: ");
+            const categoryDescription = p("Enter description for the new category: ");
+            const newCategory = new Category({
+                name: categoryName,
+                description: categoryDescription
+            });
+            category = await newCategory.save();
+            console.log(`New category "${categoryName}" added.`);
+        } else {
+            console.log("Invalid category choice.");
+            return;
+        }
+
+        // Prompt the user to choose a supplier or add a new one
+        const supplierChoice = parseInt(p("Choose existing supplier or add a new one (Enter number): "));
+        let supplier;
+        // If the user chooses an existing supplier
+        if (supplierChoice >= 1 && supplierChoice <= suppliers.length) {
+            supplier = suppliers[supplierChoice - 1];
+        } else if (supplierChoice === suppliers.length + 1) {
+            // If the user chooses to add a new supplier
+            const supplierName = p("Enter name for the new supplier: ");
+            const supplierContact = p("Enter contact for the new supplier: ");
+            const newSupplier = new Supplier({
+                name: supplierName,
+                contact: supplierContact
+            });
+            supplier = await newSupplier.save();
+            console.log(`New supplier "${supplierName}" added.`);
+        } else {
+            console.log("Invalid supplier choice.");
+            return;
+        }
+
         const price = parseFloat(p("Enter price: "));
         const cost = parseFloat(p("Enter cost: "));
         const stock = parseInt(p("Enter stock: "));
 
         const addedProduct = new Product({
             name,
-            category,
+            category: category.name, // Assign category ID instead of name
+            supplier: supplierName, // Assign supplier ID instead of name
             price,
             cost,
             stock,
         });
         await addedProduct.save();
         console.log("-".repeat(30));
-        console.log(`Product "${name}" was added!`);
+        console.log(`Product "${name}" was added under category "${category.name}" with supplier "${supplier.name}"`);
     } catch (error) {
         console.error("Error adding new product:", error);
     }
@@ -270,19 +332,37 @@ export async function createOrderForOffers() {
 // Case 10: Ship orders
 export async function shipOrders() {
     try {
-        const pendingOrders = await SalesOrder.find({ status: "pending" }).populate('offer');
+        // Find all pending sales orders
+        const pendingOrders = await SalesOrder.find({ status: "pending" }).populate({
+            path: 'offer',
+            populate: { path: 'products' }
+        });
 
         for (const order of pendingOrders) {
+            // Update order status to 'shipped'
             order.status = "shipped";
             await order.save();
 
-            for (const product of order.offer.products) {
-                product.stock -= order.quantity;
-                await product.save();
+            // For each product in the order's offer, decrement stock based on order quantity
+            for (const productId of order.offer.products) {
+                const product = await Product.findById(productId);
+                if (product.stock >= order.quantity) {
+                    product.stock -= order.quantity;
+                    await product.save();
+                } else {
+                    // Handle case where there isn't enough stock
+                    console.error(`Not enough stock for product ${product.name}. Unable to ship order.`);
+                    // Optionally revert the order status if you want strict inventory control
+                    order.status = "pending";
+                    await order.save();
+                    return; // Stop processing this order
+                }
             }
+
+            console.log(`Order ${order._id} shipped successfully.`);
         }
 
-        console.log("Orders shipped successfully.");
+        console.log("All pending orders processed.");
     } catch (error) {
         console.error("Error shipping orders:", error);
     }
