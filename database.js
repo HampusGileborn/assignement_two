@@ -8,6 +8,7 @@ const Schema = mongoose.Schema;
 const productSchema = new Schema({
     name: { type: String, required: true },
     category: { type: String, required: true },
+    supplier: { type: String, required: true },
     price: { type: Number, required: true },
     cost: { type: Number, required: true },
     stock: { type: Number, required: true },
@@ -15,7 +16,7 @@ const productSchema = new Schema({
 
 // Define schema for offers
 const offerSchema = new Schema({
-    offerId: { type: String, required: true },
+    offerID: { type: Number, required: true },
     products: [{ type: Schema.Types.ObjectId, ref: 'Product', required: true }],
     price: { type: Number, required: true },
     active: { type: Boolean, default: true },
