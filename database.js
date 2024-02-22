@@ -16,8 +16,8 @@ const productSchema = new Schema({
 
 // Define schema for offers
 const offerSchema = new Schema({
-    offerID: { type: Number, required: true },
-    products: [{ type: Schema.Types.ObjectId, ref: 'Product', required: true }],
+    offer: { type: Number, required: true },
+    products: [{ type: String, required: true }],
     price: { type: Number, required: true },
     active: { type: Boolean, default: true },
 });
