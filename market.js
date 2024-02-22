@@ -168,60 +168,58 @@ export async function viewOffersInPriceRange() {
         console.error("Error viewing offers in price range:", error);
     }
 }
-
-// Case 6: View offers by category
+// Case 6: View offers by Category
 export async function viewOffersByCategory() {
     try {
-        const categories = await Category.find();
+        // Prompt the user to choose a category
         console.log("Categories:");
+        const categories = await Category.find();
         categories.forEach((category, index) => {
             console.log(`${index + 1}. ${category.name}`);
         });
-
         const choice = parseInt(p("Choose category: "));
         const selectedCategory = categories[choice - 1];
 
+        // Find offers containing products from the selected category using aggregation
         const offers = await Offer.aggregate([
-            // Match active offers
-            { $match: { active: true } },
-            // Lookup products based on the category
             {
                 $lookup: {
                     from: "products",
                     localField: "products",
-                    foreignField: "name", // Assuming the product name is used for the lookup
-                    as: "products"
+                    foreignField: "name",
+                    as: "matchedProducts"
                 }
             },
-            // Log the intermediate result
-            { $addFields: { intermediateResult: "$$ROOT" } },
-            // Unwind the products array
-            { $unwind: "$products" },
-            // Log the intermediate result
-            { $addFields: { intermediateResult2: "$$ROOT" } },
-            // Match products in the selected category
-            { $match: { "products.category": selectedCategory.name } },
-            // Group offers by their unique identifier and accumulate necessary fields
             {
-                $group: {
-                    _id: "$_id",
-                    price: { $first: "$price" },
-                    products: { $push: "$products.name" } // Accumulate product names
+                $match: {
+                    "matchedProducts.category": selectedCategory.name
+                }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    products: "$matchedProducts",
+                    price: 1
                 }
             }
         ]);
 
-        console.log(`Offers containing products from category "${selectedCategory.name}":`, offers);
+        // Display offers and their details
+        console.log(`Offers containing products from category "${selectedCategory.name}":`);
         offers.forEach((offer, index) => {
-            console.log(`${index + 1}. Offer ID: ${offer._id} - Products: ${offer.products.join(", ")} - Price: $${offer.price}`);
+            console.log(`${index + 1}. Offer:`);
+            console.log("Products:");
+            offer.products.forEach((product, index) => {
+                console.log(`${index + 1}. ${product.name}`);
+            });
+            console.log("Total Price: ")
+            console.log(`$ ${offer.price}`)
+            console.log("--------------------");
         });
     } catch (error) {
         console.error("Error viewing offers by category:", error);
     }
 }
-
-
-
 
 // Case 7: View offers by stock
 export async function viewOffersByStock() {
