@@ -255,7 +255,6 @@ export async function viewOffersByStock() {
 }
 
 // Case 8: Create order for products
-// Case 8: Create order for products
 export async function createOrderForProducts() {
     try {
         const products = await Product.find();
@@ -390,5 +389,23 @@ export async function shipOrders() {
         console.log("All pending orders processed.");
     } catch (error) {
         console.error("Error shipping orders:", error);
+    }
+}
+// Case 11: Add a new supplier
+export async function addNewSupplier() {
+    try {
+        console.log("Add data for a new supplier: ");
+        const name = p("Enter name of supplier: ");
+        const contact = p("Enter contact information of supplier: ");
+
+        const newSupplier = new Supplier({
+            name,
+            contact,
+        });
+        await newSupplier.save();
+        console.log("-".repeat(100));
+        console.log(`Supplier "${name}" was added!`);
+    } catch (error) {
+        console.error("Error adding new supplier:", error);
     }
 }
