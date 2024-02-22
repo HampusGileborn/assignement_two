@@ -409,3 +409,16 @@ export async function addNewSupplier() {
         console.error("Error adding new supplier:", error);
     }
 }
+
+// Case 12: View all suppliers
+export async function viewAllSuppliers() {
+    try {
+        console.log("All Suppliers:");
+        const suppliers = await Supplier.find({}, 'name contact');
+        suppliers.forEach((supplier, index) => {
+            console.log(`${index + 1}. Name: ${supplier.name} | Contact: ${supplier.contact}`);
+        });
+    } catch (error) {
+        console.error("Error viewing all suppliers:", error);
+    }
+}
