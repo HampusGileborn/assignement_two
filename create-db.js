@@ -19,6 +19,7 @@ const productSchema = new Schema({
 
 // Define schema for offers
 const offerSchema = new Schema({
+    offer: {type: Number, required: true }, 
     products: [{ type: String, required: true }],
     price: { type: Number, required: true },
     active: { type: Boolean, default: true }
@@ -61,10 +62,11 @@ const productsData = [
 ];
 
 const offersData = [
-    { products: ["Laptop", "Smartphone"], price: 1800, active: true },
-    { products: ["T-shirt", "Shampoo"], price: 30, active: true },
-    { products: ["Refrigerator", "Smartphone", "Soccer Ball"], price: 1830, active: false }
+    { offer: 1, products: ["Laptop", "Smartphone"], price: 1800, active: true },
+    { offer: 2, products: ["T-shirt", "Shampoo"], price: 30, active: true },
+    { offer: 3, products: ["Refrigerator", "Smartphone", "Soccer Ball"], price: 1830, active: false }
 ];
+
 
 const suppliersData = [
     { name: "Electronics Supplier Inc.", contact: "john@electronicsupplier.com" },

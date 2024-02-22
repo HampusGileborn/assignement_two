@@ -162,7 +162,7 @@ export async function viewOffersInPriceRange() {
 
         console.log(`Offers within price range $${minPrice} - $${maxPrice}:`);
         offers.forEach((offer, index) => {
-            console.log(`${index + 1}. Offer ID: ${offer.offerId} - Price: $${offer.price}`);
+            console.log(`${index + 1}. Offer ID: ${offer.offerID} - Price: $${offer.price}`);
         });
     } catch (error) {
         console.error("Error viewing offers in price range:", error);
@@ -181,18 +181,47 @@ export async function viewOffersByCategory() {
         const choice = parseInt(p("Choose category: "));
         const selectedCategory = categories[choice - 1];
 
-        const productsInCategory = await Product.find({ category: selectedCategory.name });
+        const offers = await Offer.aggregate([
+            // Match active offers
+            { $match: { active: true } },
+            // Lookup products based on the category
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "products",
+                    foreignField: "name", // Assuming the product name is used for the lookup
+                    as: "products"
+                }
+            },
+            // Log the intermediate result
+            { $addFields: { intermediateResult: "$$ROOT" } },
+            // Unwind the products array
+            { $unwind: "$products" },
+            // Log the intermediate result
+            { $addFields: { intermediateResult2: "$$ROOT" } },
+            // Match products in the selected category
+            { $match: { "products.category": selectedCategory.name } },
+            // Group offers by their unique identifier and accumulate necessary fields
+            {
+                $group: {
+                    _id: "$_id",
+                    price: { $first: "$price" },
+                    products: { $push: "$products.name" } // Accumulate product names
+                }
+            }
+        ]);
 
-        const offers = await Offer.find({ products: { $in: productsInCategory.map(product => product._id) } });
-
-        console.log(`Offers containing products from category "${selectedCategory.name}":`);
+        console.log(`Offers containing products from category "${selectedCategory.name}":`, offers);
         offers.forEach((offer, index) => {
-            console.log(`${index + 1}. Offer ID: ${offer.offerId} - Price: $${offer.price}`);
+            console.log(`${index + 1}. Offer ID: ${offer._id} - Products: ${offer.products.join(", ")} - Price: $${offer.price}`);
         });
     } catch (error) {
         console.error("Error viewing offers by category:", error);
     }
 }
+
+
+
 
 // Case 7: View offers by stock
 export async function viewOffersByStock() {
@@ -225,6 +254,7 @@ export async function viewOffersByStock() {
     }
 }
 
+// Case 8: Create order for products
 // Case 8: Create order for products
 export async function createOrderForProducts() {
     try {
@@ -263,7 +293,6 @@ export async function createOrderForProducts() {
 
         const offerProducts = productQuantities.map(({ product }) => product._id);
         const newOffer = new Offer({
-            offerId: `Offer ${new mongoose.Types.ObjectId()}`,
             products: offerProducts,
             price: totalPrice,
             active: true
@@ -282,7 +311,7 @@ export async function createOrderForProducts() {
             await product.save();
         }
 
-        console.log(`Order created successfully for selected products. Offer ID: ${newOffer.offerId}`);
+        console.log(`Order created successfully for selected products.`);
     } catch (error) {
         console.error("Error creating order for products:", error);
     }
@@ -294,7 +323,7 @@ export async function createOrderForOffers() {
         const offers = await Offer.find({ active: true });
         console.log("Available Offers:");
         offers.forEach((offer, index) => {
-            console.log(`${index + 1}. Offer ID: ${offer.offerId} - Price: $${offer.price}`);
+            console.log(`${index + 1}. Offer ID: ${offer.offerID} - Price: $${offer.price}`);
         });
 
         const selectedIndex = parseInt(p("Enter the index of the offer to include in the order: ")) - 1;
@@ -306,9 +335,9 @@ export async function createOrderForOffers() {
 
         const selectedOffer = offers[selectedIndex];
 
-        const quantity = parseInt(p(`Enter the quantity of Offer ${selectedOffer.offerId} to order: `));
+        const quantity = parseInt(p(`Enter the quantity of Offer ${selectedOffer.offerID} to order: `));
         if (isNaN(quantity) || quantity <= 0) {
-            console.log(`Invalid quantity for Offer ${selectedOffer.offerId}.`);
+            console.log(`Invalid quantity for Offer ${selectedOffer.offerID}.`);
             return;
         }
 
@@ -319,7 +348,7 @@ export async function createOrderForOffers() {
         });
         await newOrder.save();
 
-        console.log(`Order created successfully for Offer ${selectedOffer.offerId}.`);
+        console.log(`Order created successfully for Offer ${selectedOffer.offerID}.`);
     } catch (error) {
         console.error("Error creating order for offers:", error);
     }
