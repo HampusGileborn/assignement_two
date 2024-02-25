@@ -231,7 +231,7 @@ export async function viewOffersByStock() {
         let noProductsInStock = 0;
 
         for (const offer of offers) {
-            const products = await Product.find({ _id: { $in: offer.products } });
+            const products = await Product.find({ name: { $in: offer.products } });
             const inStockProducts = products.filter(product => product.stock > 0);
 
             if (inStockProducts.length === products.length) {
@@ -288,11 +288,13 @@ export async function createOrderForProducts() {
 
         const totalPrice = productQuantities.reduce((total, { product, quantity }) => total + (product.price * quantity), 0);
 
-        const offerProducts = productQuantities.map(({ product }) => product._id);
+        const offerProducts = productQuantities.map(({ product }) => product.name);
+
         const newOffer = new Offer({
             products: offerProducts,
             price: totalPrice,
-            active: true
+            active: true,
+            offer: (await Offer.find({})).length
         });
         await newOffer.save();
 
@@ -475,8 +477,9 @@ function calculateTotalCost(order) {
 
 
 //case 14
-export async function showProfitsForProduct(productName) {
+export async function showProfitsForProduct() {
     try {
+        const productName = p("Enter name of product: ");
         // Find the product by name
         const product = await Product.findOne({ name: productName });
         if (!product) {
@@ -503,4 +506,5 @@ export async function showProfitsForProduct(productName) {
         console.log(`Total Profit for offers containing "${productName}": $${totalProfit.toFixed(2)}`);
     } catch (error) {
         console.error("Error showing profits for product:", error);
-
+    }
+}
