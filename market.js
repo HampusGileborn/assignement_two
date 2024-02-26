@@ -476,35 +476,78 @@ function calculateTotalCost(order) {
 }
 
 
-//case 14
-export async function showProfitsForProduct() {
+// Case 14: Calculate profit from shipped orders based on product prices
+export async function calculateProfitFromShippedOrders() {
     try {
-        const productName = p("Enter name of product: ");
-        // Find the product by name
-        const product = await Product.findOne({ name: productName });
-        if (!product) {
-            console.log(`Product "${productName}" not found.`);
-            return;
-        }
-
-        // Find all sales orders
-        const salesOrders = await SalesOrder.find().populate('offer');
-
-        let totalProfit = 0;
-
-        // Calculate profit for offers containing the specific product
-        for (const order of salesOrders) {
-            const { offer, quantity } = order;
-            if (offer.products.includes(productName)) {
-                const totalRevenue = offer.price * quantity;
-                const totalCost = calculateTotalCost(order);
-                const profit = totalRevenue - totalCost;
-                totalProfit += profit;
+        const pipeline = [
+            {
+              "$match": {
+                "status": "shipped"
+              }
+            },
+            {
+              "$lookup": {
+                "from": "offers",
+                "localField": "offer",
+                "foreignField": "_id",
+                "as": "matchedOffer"
+              }
+            },
+            {
+              "$unwind": "$matchedOffer"
+            },
+            {
+              "$unwind": "$matchedOffer.products"
+            },
+            {
+              "$lookup": {
+                "from": "products",
+                "localField": "matchedOffer.products",
+                "foreignField": "name",
+                "as": "matchedProduct"
+              }
+            },
+            {
+              "$unwind": "$matchedProduct"
+            },
+            {
+              "$project": {
+                "productPrice": "$matchedProduct.price",
+                "productCost": "$matchedProduct.cost",
+                "quantity": "$quantity",
+                "profit": {
+                  "$multiply": [
+                    {
+                      "$subtract": [
+                        "$matchedProduct.price",
+                        "$matchedProduct.cost"
+                      ]
+                    },
+                    "$quantity"
+                  ]
+                }
+              }
+            },
+            {
+              "$group": {
+                "_id": null,
+                "totalProfit": {
+                  "$sum": "$profit"
+                }
+              }
             }
-        }
+          ];
+          
 
-        console.log(`Total Profit for offers containing "${productName}": $${totalProfit.toFixed(2)}`);
+        const result = await SalesOrder.aggregate(pipeline);
+
+        console.log("Total profit from shipped orders based on product prices:");
+        if (result.length > 0) {
+            console.log(`Profit: ${result[0].totalProfit}`);
+        } else {
+            console.log("No profit from shipped orders found.");
+        }
     } catch (error) {
-        console.error("Error showing profits for product:", error);
+        console.error("Error calculating profit from shipped orders:", error);
     }
 }
