@@ -162,7 +162,8 @@ export async function viewOffersInPriceRange() {
 
         console.log(`Offers within price range $${minPrice} - $${maxPrice}:`);
         offers.forEach((offer, index) => {
-            console.log(`${index + 1}. Offer ID: ${offer.offerID} - Price: $${offer.price}`);
+            console.log(`${index + 1}. Offer ID: ${offer.offer} - Price: $${offer.price}`);
+            console.log(`Products: ${offer.products}`)
         });
     } catch (error) {
         console.error("Error viewing offers in price range:", error);
@@ -455,7 +456,6 @@ export async function viewAllSales() {
             const totalCost = calculateTotalCost(order);
             console.log(`Order Number: ${index + 1}`);
             console.log(`Order ID: ${_id}`);
-            console.log(`Date: ${createdAt}`);
             console.log(`Status: ${status}`);
             console.log(`Total Cost: $${totalCost}`);
             console.log("--------------------");
@@ -542,7 +542,7 @@ export async function calculateProfitFromShippedOrders() {
 
         if (result.length > 0) {
             console.log("Total profit from shipped orders based on product prices:");
-            console.log(`Profit: ${result[0].totalProfit}`);
+            console.log(`Profit: $ ${result[0].totalProfit}`);
         } else {
             console.log("No orders are shipped. Profit cannot be calculated.");
         }
