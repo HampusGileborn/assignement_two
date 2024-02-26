@@ -481,71 +481,70 @@ export async function calculateProfitFromShippedOrders() {
     try {
         const pipeline = [
             {
-              "$match": {
-                "status": "shipped"
-              }
-            },
-            {
-              "$lookup": {
-                "from": "offers",
-                "localField": "offer",
-                "foreignField": "_id",
-                "as": "matchedOffer"
-              }
-            },
-            {
-              "$unwind": "$matchedOffer"
-            },
-            {
-              "$unwind": "$matchedOffer.products"
-            },
-            {
-              "$lookup": {
-                "from": "products",
-                "localField": "matchedOffer.products",
-                "foreignField": "name",
-                "as": "matchedProduct"
-              }
-            },
-            {
-              "$unwind": "$matchedProduct"
-            },
-            {
-              "$project": {
-                "productPrice": "$matchedProduct.price",
-                "productCost": "$matchedProduct.cost",
-                "quantity": "$quantity",
-                "profit": {
-                  "$multiply": [
-                    {
-                      "$subtract": [
-                        "$matchedProduct.price",
-                        "$matchedProduct.cost"
-                      ]
-                    },
-                    "$quantity"
-                  ]
+                "$match": {
+                    "status": "shipped"
                 }
-              }
             },
             {
-              "$group": {
-                "_id": null,
-                "totalProfit": {
-                  "$sum": "$profit"
+                "$lookup": {
+                    "from": "offers",
+                    "localField": "offer",
+                    "foreignField": "_id",
+                    "as": "matchedOffer"
                 }
-              }
+            },
+            {
+                "$unwind": "$matchedOffer"
+            },
+            {
+                "$unwind": "$matchedOffer.products"
+            },
+            {
+                "$lookup": {
+                    "from": "products",
+                    "localField": "matchedOffer.products",
+                    "foreignField": "name",
+                    "as": "matchedProduct"
+                }
+            },
+            {
+                "$unwind": "$matchedProduct"
+            },
+            {
+                "$project": {
+                    "productPrice": "$matchedProduct.price",
+                    "productCost": "$matchedProduct.cost",
+                    "quantity": "$quantity",
+                    "profit": {
+                        "$multiply": [
+                            {
+                                "$subtract": [
+                                    "$matchedProduct.price",
+                                    "$matchedProduct.cost"
+                                ]
+                            },
+                            "$quantity"
+                        ]
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": null,
+                    "totalProfit": {
+                        "$sum": "$profit"
+                    }
+                }
             }
-          ];
-          
+        ];
 
         const result = await SalesOrder.aggregate(pipeline);
 
-        console.log("Total profit from shipped orders based on product prices:");
         if (result.length > 0) {
+            console.log("Total profit from shipped orders based on product prices:");
             console.log(`Profit: ${result[0].totalProfit}`);
         } else {
-            console.log("No profit from shipped orders found.");
+            console.log("No orders are shipped. Profit cannot be calculated.");
         }
     } catch (error) {
         console.error("Error calculating profit from shipped orders:", error);
